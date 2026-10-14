@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Kegiatan Majalah - Seksi Lalu Lintas Dishub Kolaka</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2canvas and jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Playfair+Display:ital,wght@0,700;0,800;1,600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #0b1329;
+            color: #f8fafc;
+        }
+        .font-serif-title {
+            font-family: 'Playfair Display', serif;
+        }
+        .font-header-title {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Fixed Standard A4 Canvas Dimensions (794px x 1123px at 96 DPI) */
+        .magazine-page {
+            width: 794px;
+            height: 1123px;
+            min-width: 794px;
+            min-height: 1123px;
+            max-width: 794px;
+            max-height: 1123px;
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            position: relative;
+            box-sizing: border-box;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 32px 36px;
+        }
+
+        /* Strict non-distorting image container with Sky Blue background */
+        .img-contain-box {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0284c7;
+            overflow: hidden;
+            position: relative;
+        }
+        .img-contain-box img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain !important;
+            display: block;
+            margin: auto;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0284c7;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-50 px-4 py-3 shadow-md">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-500/20 border border-amber-500/40 p-2 rounded-xl text-amber-400">
+                    <i class="fa-solid fa-newspaper text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-white tracking-wide leading-tight">Generator Laporan Kegiatan Majalah</h1>
+                    <p class="text-xs text-amber-400 font-semibold">Seksi Lalu Lintas - Dishub Kabupaten Kolaka</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="downloadPDF(this)" class="bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 active:scale-95 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition flex items-center shadow-lg shadow-red-600/30 cursor-pointer">
+                    <i class="fa-solid fa-file-pdf mr-2 text-base"></i> Download PDF A4 (Berwarna HD)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto w-full p-4 md:p-6 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- LEFT SIDE: INPUT FORM (5 cols on lg) -->
+        <section class="lg:col-span-5 bg-slate-800/80 backdrop-blur border border-slate-700/60 rounded-2xl p-5 shadow-xl">
+            <div class="border-b border-slate-700 pb-3 mb-4 flex items-center justify-between">
+                <h2 class="text-base font-bold text-white flex items-center">
+                    <i class="fa-solid fa-pen-to-square text-sky-400 mr-2"></i> Form Input Data Laporan
+                </h2>
+                <span class="text-[11px] bg-sky-950 text-sky-300 border border-sky-800/60 px-2.5 py-0.5 rounded-full font-medium">Seksi Lalu Lintas</span>
+            </div>
+
+            <form id="reportForm" class="space-y-3.5 text-xs" onsubmit="event.preventDefault()">
+                <!-- Tanggal Kegiatan -->
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Tanggal Kegiatan</label>
+                    <input type="date" id="inputTanggal" value="" onchange="updatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+                </div>
+
+                <!-- Judul Utama Kegiatan -->
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Judul Utama Kegiatan</label>
+                    <input type="text" id="inputJudul" value="" placeholder="Masukkan Judul Laporan Kegiatan..." oninput="updatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-semibold focus:outline-none focus:border-amber-500">
+                </div>
+
+                <!-- Lokasi Kegiatan -->
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Lokasi Pelaksanaan</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-location-dot absolute left-3 top-2.5 text-amber-400"></i>
+                        <input type="text" id="inputLokasi" value="" placeholder="Lokasi Pelaksanaan Kegiatan..." oninput="updatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <!-- Tim Pelaksana -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Penanggung Jawab / Kasi</label>
+                        <input type="text" id="inputKasi" value="Muh. Ihsan Nur, SE" oninput="updatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500 font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Jumlah Personil / Tim</label>
+                        <input type="text" id="inputPersonil" value="" placeholder="mis. 12 Personil Lapangan" oninput="updatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <!-- Deskripsi Ringkasan / Berita Utama -->
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Narasi Ringkasan Kegiatan</label>
+                    <textarea id="inputNarasi" rows="4" placeholder="Tuliskan ringkasan uraian atau kegiatan di sini..." oninput="updatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:border-amber-500 leading-relaxed"></textarea>
+                </div>
+
+                <!-- Poin-Poin Hasil Kegiatan -->
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Poin Hasil & Catatan Lapangan</label>
+                    <input type="text" id="inputPoin1" value="" placeholder="Poin hasil 1..." oninput="updatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white mb-2 focus:outline-none focus:border-amber-500">
+                    <input type="text" id="inputPoin2" value="" placeholder="Poin hasil 2..." oninput="updatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white mb-2 focus:outline-none focus:border-amber-500">
+                    <input type="text" id="inputPoin3" value="" placeholder="Poin hasil 3..." oninput="updatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-white mb-2 focus:outline-none focus:border-amber-500">
+                </div>
+
+                <!-- Upload Dokumentasi Foto -->
+                <div class="pt-2 border-t border-slate-700/80">
+                    <label class="block font-semibold text-slate-300 mb-1">Foto Utama Kegiatan</label>
+                    <input type="file" id="uploadFotoUtama" accept="image/*" onchange="handleImageUpload(event, 'previewFotoUtama')" class="w-full text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:font-semibold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 pt-1">
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Foto Dokumentasi 1</label>
+                        <input type="file" id="uploadFoto1" accept="image/*" onchange="handleImageUpload(event, 'previewFoto1')" class="w-full text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-slate-700 file:text-white">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1">Foto Dokumentasi 2</label>
+                        <input type="file" id="uploadFoto2" accept="image/*" onchange="handleImageUpload(event, 'previewFoto2')" class="w-full text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-slate-700 file:text-white">
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- RIGHT SIDE: LIVE COLORFUL MAGAZINE PREVIEW (7 cols on lg) -->
+        <section class="lg:col-span-7 flex flex-col items-center">
+            <div class="w-full mb-3 flex items-center justify-between text-slate-400 text-xs px-1">
+                <span class="flex items-center"><i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-amber-400"></i> Desain Laporan Eksekutif & Elegan (A4)</span>
+                <span class="text-sky-400 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i> Format HD Presisi Pro</span>
+            </div>
+
+            <!-- Wrapper Canvas Scrollable -->
+            <div class="w-full overflow-x-auto flex justify-center pb-8">
+                <!-- MAGAZINE A4 PAGE TARGET -->
+                <div id="magazineTarget" class="magazine-page relative bg-gradient-to-b from-slate-50 via-white to-slate-50 border border-slate-200">
+                    
+                    <!-- ELEGANT TOP HEADER / KOP LAPORAN -->
+                    <header class="relative z-10 -mx-9 -mt-8 p-7 bg-gradient-to-r from-sky-900 via-slate-900 to-sky-950 text-white shadow-xl border-b-4 border-amber-500 overflow-hidden">
+                        <!-- Decorative Geometry Background Accents -->
+                        <div class="absolute -right-10 -top-10 w-44 h-44 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                        <div class="absolute left-1/3 top-0 w-32 h-32 bg-sky-500/10 rounded-full blur-xl pointer-events-none"></div>
+
+                        <div class="relative z-10 flex items-center justify-between">
+                            <div class="space-y-1">
+                                <div class="flex items-center space-x-2">
+                                    <span class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-[10px] font-black px-3 py-0.5 rounded-full tracking-widest uppercase shadow-sm">
+                                        LAPORAN KEGIATAN
+                                    </span>
+                                    <span class="text-amber-400 text-[10px] tracking-wider font-bold uppercase">
+                                        • SEKSI LALU LINTAS
+                                    </span>
+                                </div>
+                                <h1 class="text-2xl font-black tracking-tight leading-none uppercase font-header-title text-white pt-1">
+                                    DINAS PERHUBUNGAN
+                                </h1>
+                                <p class="text-xs font-extrabold text-amber-400 tracking-widest uppercase flex items-center">
+                                    <i class="fa-solid fa-location-dot text-red-500 mr-1.5 text-[10px]"></i> KABUPATEN KOLAKA
+                                </p>
+                            </div>
+
+                            <!-- Decorative Badge Frame -->
+                            <div class="hidden sm:flex flex-col items-end justify-center border-l-2 border-amber-500/40 pl-4 py-1">
+                                <span class="text-[9px] font-bold text-slate-300 tracking-wider uppercase">DOKUMEN KINERJA</span>
+                                <span class="text-[11px] font-black text-amber-400 tracking-wide">SEKSI LANTAS</span>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- BODY CONTENT MAJALAH ELEGANT -->
+                    <div class="relative z-10 flex-grow flex flex-col justify-between space-y-3.5 pt-3">
+                        
+                        <!-- HEADLINE BANNER CARD -->
+                        <div class="bg-gradient-to-r from-sky-900/10 via-amber-500/5 to-white border-l-4 border-sky-600 p-4 rounded-r-2xl border-y border-r border-slate-200/80 shadow-sm relative overflow-hidden">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span id="outTanggal" class="text-sky-950 text-[11px] font-extrabold flex items-center bg-sky-100/90 px-3 py-1 rounded-lg border border-sky-200 shadow-xs">
+                                    <i class="fa-regular fa-calendar-days mr-1.5 text-sky-700"></i> -
+                                </span>
+                                <span class="text-[9px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-200 uppercase tracking-wider">
+                                    Dokumen Resmi Lapangan
+                                </span>
+                            </div>
+                            <h1 id="outJudul" class="text-base font-black text-slate-400 leading-snug tracking-tight font-serif-title uppercase italic pt-0.5">
+                                [ JUDUL UTAMA KEGIATAN ]
+                            </h1>
+                        </div>
+
+                        <!-- MAIN FEATURE PHOTO CONTAINER WITH PROPORTIONAL FRAME & SKY BLUE BG -->
+                        <div class="relative w-full h-52 rounded-2xl overflow-hidden border-2 border-sky-500/80 bg-sky-600 shadow-md group">
+                            <div class="img-contain-box bg-sky-600">
+                                <img id="previewFotoUtama" src="https://placehold.co/800x450/0284c7/e0f2fe?text=Foto+Utama+Kegiatan" alt="Foto Utama Kegiatan">
+                            </div>
+                            <!-- Elegant Overlay Caption -->
+                            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-sky-950/95 via-sky-950/60 to-transparent p-3 text-white pointer-events-none flex items-center justify-between">
+                                <p id="outLokasi" class="text-xs font-semibold flex items-center text-amber-300 italic">
+                                    <i class="fa-solid fa-map-pin mr-2 text-red-400 text-sm animate-bounce"></i> [ Lokasi Kegiatan ]
+                                </p>
+                                <span class="text-[9px] font-bold bg-sky-700/90 border border-sky-500/60 text-sky-100 px-2 py-0.5 rounded">Foto Utama</span>
+                            </div>
+                        </div>
+
+                        <!-- TWO COLUMN EXECUTIVE DESIGN -->
+                        <div class="grid grid-cols-12 gap-3.5 text-slate-800 text-xs leading-relaxed">
+                            <!-- Left Column: Narasi Ringkasan -->
+                            <div class="col-span-7 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-2.5 relative">
+                                <div class="absolute top-0 right-0 w-16 h-16 bg-sky-500/5 rounded-bl-full pointer-events-none"></div>
+                                <div>
+                                    <h3 class="font-extrabold text-sky-950 text-xs uppercase tracking-wider border-b-2 pb-1.5 border-amber-400 flex items-center mb-2">
+                                        <i class="fa-solid fa-file-signature mr-2 text-sky-700"></i> Ringkasan Uraian Kegiatan
+                                    </h3>
+                                    <p id="outNarasi" class="text-justify font-medium text-slate-400 leading-relaxed italic text-[11px] px-0.5">
+                                        [ Ringkasan narasi atau laporan kegiatan akan tampil di sini setelah Anda mengisi form di sebelah kiri ]
+                                    </p>
+                                </div>
+
+                                <!-- Personnel Card Accent - Sky Blue Theme -->
+                                <div class="bg-gradient-to-r from-sky-600 via-sky-500 to-blue-600 text-white p-2.5 rounded-xl shadow-sm border border-sky-400">
+                                    <p class="font-black text-[9px] text-amber-200 uppercase tracking-wider flex items-center">
+                                        <i class="fa-solid fa-users mr-1.5 text-amber-200"></i> Tim & Personil Lapangan:
+                                    </p>
+                                    <p id="outPersonil" class="text-[11px] text-sky-50 italic font-semibold mt-0.5">[ Jumlah Personil ]</p>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Key Points -->
+                            <div class="col-span-5 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-white p-3.5 rounded-2xl border border-amber-200 shadow-sm flex flex-col justify-between relative">
+                                <div>
+                                    <h3 class="font-extrabold text-amber-950 text-xs uppercase tracking-wider border-b-2 pb-1.5 border-amber-500 mb-2 flex items-center">
+                                        <i class="fa-solid fa-clipboard-check mr-2 text-amber-600"></i> Catatan Hasil Lapangan
+                                    </h3>
+                                    <ul class="space-y-2 text-[11px] font-medium text-slate-700">
+                                        <li id="outPoin1" class="flex items-start bg-white/90 p-2 rounded-xl border border-amber-200/70 shadow-xs">
+                                            <i class="fa-solid fa-circle-check text-slate-300 mt-0.5 mr-2 flex-shrink-0"></i>
+                                            <span class="text-slate-400 italic">-</span>
+                                        </li>
+                                        <li id="outPoin2" class="flex items-start bg-white/90 p-2 rounded-xl border border-amber-200/70 shadow-xs">
+                                            <i class="fa-solid fa-circle-check text-slate-300 mt-0.5 mr-2 flex-shrink-0"></i>
+                                            <span class="text-slate-400 italic">-</span>
+                                        </li>
+                                        <li id="outPoin3" class="flex items-start bg-white/90 p-2 rounded-xl border border-amber-200/70 shadow-xs">
+                                            <i class="fa-solid fa-circle-check text-slate-300 mt-0.5 mr-2 flex-shrink-0"></i>
+                                            <span class="text-slate-400 italic">-</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DOCUMENTATION GALLERY WITH SKY BLUE FRAMES -->
+                        <div class="space-y-2 pt-1">
+                            <h3 class="font-extrabold text-slate-900 text-[11px] uppercase tracking-wider border-b-2 border-slate-200 pb-1 flex items-center text-sky-950">
+                                <i class="fa-solid fa-camera-retro mr-2 text-amber-600"></i> Dokumentasi Lapangan Tambahan
+                            </h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <!-- Photo Box 1 -->
+                                <div class="h-28 rounded-2xl overflow-hidden border-2 border-sky-500 bg-sky-600 relative shadow-sm">
+                                    <div class="img-contain-box bg-sky-600">
+                                        <img id="previewFoto1" src="https://placehold.co/600x400/0284c7/e0f2fe?text=Dokumentasi+1" alt="Dokumentasi 1">
+                                    </div>
+                                    <span class="absolute bottom-2 left-2 z-20 bg-sky-800/90 text-amber-300 text-[9px] px-2.5 py-0.5 rounded-md font-extrabold tracking-wide border border-sky-500 shadow-sm">
+                                        GIAT 01
+                                    </span>
+                                </div>
+                                <!-- Photo Box 2 -->
+                                <div class="h-28 rounded-2xl overflow-hidden border-2 border-sky-500 bg-sky-600 relative shadow-sm">
+                                    <div class="img-contain-box bg-sky-600">
+                                        <img id="previewFoto2" src="https://placehold.co/600x400/0284c7/e0f2fe?text=Dokumentasi+2" alt="Dokumentasi 2">
+                                    </div>
+                                    <span class="absolute bottom-2 left-2 z-20 bg-sky-800/90 text-amber-300 text-[9px] px-2.5 py-0.5 rounded-md font-extrabold tracking-wide border border-sky-500 shadow-sm">
+                                        GIAT 02
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ELEGANT FOOTER: SIGNATURE & OFFICIAL STAMP -->
+                    <footer class="relative z-10 pt-3 mt-2 border-t-2 border-slate-300/80">
+                        <div class="flex justify-between items-end">
+                            <div class="text-[10px] text-slate-600 space-y-1">
+                                <p class="italic text-sky-950 font-extrabold flex items-center">
+                                    <i class="fa-solid fa-shield-halved text-amber-500 mr-1.5"></i> "Keselamatan Anda, Prioritas Utama Kami"
+                                </p>
+                                <p class="text-[9px] text-slate-500 font-medium">Dokumen Laporan Resmi Seksi Lalu Lintas Dishub Kabupaten Kolaka</p>
+                            </div>
+
+                            <!-- Tanda Tangan Box -->
+                            <div class="text-center w-64">
+                                <p class="text-[10px] text-slate-700 font-medium mb-0.5">Kolaka, <span id="outTanggalTtd" class="font-bold">-</span></p>
+                                <p class="text-[11px] font-black text-sky-950 leading-tight">Kepala Seksi Lalu Lintas</p>
+                                
+                                <!-- Decorative Signature Space with Watermark Stamp -->
+                                <div class="h-10 flex items-center justify-center my-1 relative">
+                                    <span class="font-serif italic text-slate-300 text-xs font-bold tracking-widest">[ Tanda Tangan ]</span>
+                                    <!-- Stamp Graphic -->
+                                    <div class="absolute right-4 top-0 w-10 h-10 border-2 border-sky-600/30 rounded-full flex items-center justify-center rotate-12 pointer-events-none">
+                                        <span class="text-[6px] font-black text-sky-600/50 uppercase text-center leading-none">DISHUB<br>KOLAKA</span>
+                                    </div>
+                                </div>
+                                
+                                <p id="outKasi" class="text-xs font-black text-slate-900 pb-0.5 inline-block w-full">Muh. Ihsan Nur, SE</p>
+                                <div class="border-b-2 border-slate-900 w-full my-0.5"></div>
+                                <p class="text-[10px] text-slate-700 font-bold mt-0.5">NIP. 19820512 200701 1 005</p>
+                            </div>
+                        </div>
+                    </footer>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer App -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
+        &copy; 2026 Seksi Lalu Lintas - Dinas Perhubungan Kabupaten Kolaka. Form Generator Majalah Laporan.
+    </footer>
+
+    <!-- Interactive JavaScript -->
+    <script>
+        function updatePreview() {
+            // Title
+            const valJudul = document.getElementById('inputJudul').value;
+            const elJudul = document.getElementById('outJudul');
+            if (valJudul) {
+                elJudul.innerText = valJudul;
+                elJudul.classList.remove('italic', 'text-slate-400');
+                elJudul.classList.add('text-slate-900');
+            } else {
+                elJudul.innerText = '[ JUDUL UTAMA KEGIATAN ]';
+                elJudul.classList.add('italic', 'text-slate-400');
+                elJudul.classList.remove('text-slate-900');
+            }
+
+            // Lokasi
+            const valLokasi = document.getElementById('inputLokasi').value;
+            document.getElementById('outLokasi').innerHTML = `<i class="fa-solid fa-location-dot mr-1.5 text-red-400"></i> ${valLokasi || '[ Lokasi Kegiatan ]'}`;
+
+            // Personil
+            const valPersonil = document.getElementById('inputPersonil').value;
+            document.getElementById('outPersonil').innerText = valPersonil || '[ Jumlah Personil ]';
+
+            // Kasi / TTD
+            document.getElementById('outKasi').innerText = document.getElementById('inputKasi').value || 'Muh. Ihsan Nur, SE';
+
+            // Narasi
+            const valNarasi = document.getElementById('inputNarasi').value;
+            const elNarasi = document.getElementById('outNarasi');
+            if (valNarasi) {
+                elNarasi.innerText = valNarasi;
+                elNarasi.classList.remove('italic', 'text-slate-400');
+                elNarasi.classList.add('text-slate-700');
+            } else {
+                elNarasi.innerText = '[ Ringkasan narasi atau laporan kegiatan akan tampil di sini setelah Anda mengisi form di sebelah kiri ]';
+                elNarasi.classList.add('italic', 'text-slate-400');
+                elNarasi.classList.remove('text-slate-700');
+            }
+
+            // Poin-poin
+            const p1 = document.getElementById('inputPoin1').value;
+            const p2 = document.getElementById('inputPoin2').value;
+            const p3 = document.getElementById('inputPoin3').value;
+
+            updatePoinItem('outPoin1', p1);
+            updatePoinItem('outPoin2', p2);
+            updatePoinItem('outPoin3', p3);
+
+            // Format Tanggal Bahasa Indonesia
+            const rawDate = document.getElementById('inputTanggal').value;
+            if (rawDate) {
+                const dateObj = new Date(rawDate);
+                const formattedDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                
+                document.getElementById('outTanggal').innerHTML = `<i class="fa-regular fa-calendar mr-1.5 text-sky-700"></i> ${formattedDate}`;
+                document.getElementById('outTanggalTtd').innerText = formattedDate;
+            } else {
+                document.getElementById('outTanggal').innerHTML = `<i class="fa-regular fa-calendar mr-1.5 text-sky-700"></i> -`;
+                document.getElementById('outTanggalTtd').innerText = '-';
+            }
+        }
+
+        function updatePoinItem(elementId, value) {
+            const el = document.getElementById(elementId);
+            const icon = el.querySelector('i');
+            const span = el.querySelector('span');
+
+            if (value) {
+                span.innerText = value;
+                span.classList.remove('italic', 'text-slate-400');
+                span.classList.add('text-slate-800');
+                icon.className = 'fa-solid fa-circle-check text-amber-600 mt-0.5 mr-1.5 flex-shrink-0';
+            } else {
+                span.innerText = '-';
+                span.classList.add('italic', 'text-slate-400');
+                span.classList.remove('text-slate-800');
+                icon.className = 'fa-solid fa-circle-check text-slate-300 mt-0.5 mr-1.5 flex-shrink-0';
+            }
+        }
+
+        // Handle Image Uploads for Preview
+        function handleImageUpload(event, targetElementId) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgEl = document.getElementById(targetElementId);
+                    imgEl.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Helper to convert cross-origin image to dataURL to avoid CORS canvas taint
+        async function convertImagesToBase64(container) {
+            const imgs = container.querySelectorAll('img');
+            const promises = Array.from(imgs).map(img => {
+                if (!img.src || img.src.startsWith('data:')) return Promise.resolve();
+                return new Promise((resolve) => {
+                    const tempImg = new Image();
+                    tempImg.crossOrigin = 'Anonymous';
+                    tempImg.onload = function() {
+                        try {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = tempImg.naturalWidth || tempImg.width || 800;
+                            canvas.height = tempImg.naturalHeight || tempImg.height || 600;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(tempImg, 0, 0);
+                            img.src = canvas.toDataURL('image/jpeg', 0.95);
+                        } catch (e) {
+                            console.warn('Could not convert image to DataURL:', e);
+                        }
+                        resolve();
+                    };
+                    tempImg.onerror = function() {
+                        resolve();
+                    };
+                    tempImg.src = img.src;
+                });
+            });
+            await Promise.all(promises);
+        }
+
+        // Download Colorful Magazine Page as High-Quality PDF Document (A4 Size)
+        async function downloadPDF(btnElement) {
+            const magazineElement = document.getElementById('magazineTarget');
+            const btn = btnElement || document.querySelector('button[onclick*="downloadPDF"]');
+            const originalText = btn ? btn.innerHTML : '';
+
+            if (btn) {
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Memproses PDF HD...`;
+                btn.disabled = true;
+            }
+
+            try {
+                await convertImagesToBase64(magazineElement);
+
+                // Lock exact A4 dimensions during render
+                const originalStyle = magazineElement.getAttribute('style') || '';
+                magazineElement.style.width = '794px';
+                magazineElement.style.height = '1123px';
+                magazineElement.style.transform = 'none';
+
+                const canvas = await html2canvas(magazineElement, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    width: 794,
+                    height: 1123
+                });
+
+                magazineElement.setAttribute('style', originalStyle);
+
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+                const pdfHeight = pdf.internal.pageSize.getHeight(); // 297mm
+
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+                const rawTitle = document.getElementById('inputJudul').value || 'Laporan_Giat';
+                const cleanTitle = rawTitle.substring(0, 25).replace(/[^a-zA-Z0-9]/g, '_');
+                const fileName = `Laporan_Giat_Dishub_Kolaka_${cleanTitle || 'Seksi_Lantas'}.pdf`;
+
+                pdf.save(fileName);
+
+            } catch (err) {
+                console.error("Gagal mengunduh PDF:", err);
+            } finally {
+                if (btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        // Initialize default view on load
+        window.onload = function() {
+            updatePreview();
+        };
+    </script>
+</body>
+</html>
